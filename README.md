@@ -10,12 +10,15 @@ and catalog format. A remote runtime handles execution.
 Use Python 3.12 or later. In a workspace containing this repository and a
 matching `mn-python-sdk` checkout with `packages/contracts`, run the following
 from `mn-surface` in an activated virtual environment. The local paths supply
-the shared dependencies while their wheels await publication.
+the shared dependencies while their wheels await publication. The SDK source
+checkout requires access to the MirrorNeuronLab SDK repository.
 
 ```sh
 python -m pip install -e ../mn-python-sdk/packages/common \
   -e ../mn-python-sdk/packages/contracts -e .
 ```
+
+With `uv`, the equivalent command is `uv pip install -e ../mn-python-sdk/packages/common -e ../mn-python-sdk/packages/contracts -e .`.
 
 ## Use the client
 

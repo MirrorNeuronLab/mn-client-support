@@ -20,6 +20,3 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.uv.sources]
-mirrorneuron-sdk-contracts = { path = "../mn-python-sdk/packages/contracts" }
