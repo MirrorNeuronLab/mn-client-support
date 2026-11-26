@@ -1,0 +1,17 @@
+LICENSE
+README.md
+pyproject.toml
+src/mirrorneuron_surface.egg-info/PKG-INFO
+src/mirrorneuron_surface.egg-info/SOURCES.txt
+src/mirrorneuron_surface.egg-info/dependency_links.txt
+src/mirrorneuron_surface.egg-info/requires.txt
+src/mirrorneuron_surface.egg-info/top_level.txt
+src/mn_surface/__init__.py
+src/mn_surface/catalog.py
+src/mn_surface/client.py
+src/mn_surface/installation.py
+src/mn_surface/lifecycle.py
+src/mn_surface/remote_api.py
+src/mn_surface/resources.py
+tests/test_remote_api.py
+tests/test_resources.py
