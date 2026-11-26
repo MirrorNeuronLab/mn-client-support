@@ -739,6 +739,10 @@
         "source": "path",
         "name": "job_id"
       },
+      "air_gapped": {
+        "source": "query",
+        "name": "air_gapped"
+      },
       "_auth": {
         "source": "principal",
         "name": "_auth"

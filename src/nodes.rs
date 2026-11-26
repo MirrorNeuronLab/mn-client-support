@@ -2,7 +2,7 @@
 use crate::{
     Error, Result,
     config::{Connection, expand, lock, object, role, target, user_home},
-    control::{Client, Method},
+    control::Client,
 };
 use serde_json::{Value, json};
 use std::{
@@ -10,6 +10,10 @@ use std::{
     path::{Path, PathBuf},
 };
 use tokio::time::Duration;
+const READINESS_TIMEOUT: Duration = Duration::from_secs(30);
+// Federation validates the peer, registers on both Cores, waits for reciprocal
+// readiness and may roll back. Each of those steps has its own 30-second budget.
+const FEDERATION_TIMEOUT_SECONDS: u64 = 300;
 const CAPABILITIES: [&str; 9] = [
     "catalog",
     "preparation",
@@ -80,7 +84,11 @@ pub async fn connect(
         (target, token, p.to_string_lossy().into_owned(), expected)
     } else {
         if runtime_home.is_some() {
-            return Err(Error::invalid("--runtime-home requires the local target."));
+            return Err(Error::new(
+                422,
+                "MN_RUNTIME_TARGET_INVALID",
+                "--runtime-home requires the local target.",
+            ));
         }
         (
             target(host, port)?,
@@ -90,11 +98,13 @@ pub async fn connect(
         )
     };
     if token.trim().is_empty() {
-        return Err(Error::new(
+        let mut error = Error::new(
             401,
             "MN_RUNTIME_TOKEN_REQUIRED",
             "A runtime node token is required.",
-        ));
+        );
+        error.exit_code = 2;
+        return Err(error);
     }
     let mut candidate = Connection {
         version: 1,
@@ -104,16 +114,7 @@ pub async fn connect(
         runtime_id: String::new(),
         runtime_home: local_path,
     };
-    let info = Client::new(&candidate)?
-        .call(
-            Method::Capabilities,
-            "runtime.capabilities",
-            json!({}),
-            "",
-            Duration::from_secs(30),
-        )
-        .await?
-        .value;
+    let info = ready(&Client::new(&candidate)?, &candidate.target).await?;
     let node = info["node_name"].as_str().unwrap_or_default();
     let id = info["runtime_id"].as_str().unwrap_or_default();
     if node.is_empty()
@@ -142,13 +143,28 @@ pub async fn connect(
     match Connection::load(root) {
         Ok(c) if c.runtime_id != id => {
             drop(guard);
-            return Client::new(&c)?
+            let entry = Client::new(&c)?;
+            let info = ready(&entry, &c.target).await?;
+            if info["runtime_id"] != c.runtime_id {
+                return Err(Error::new(
+                    409,
+                    "MN_RUNTIME_IDENTITY_MISMATCH",
+                    "The saved entry endpoint belongs to a different runtime installation.",
+                ));
+            }
+            return entry
                 .command(
                     "node.add",
                     json!({"target":candidate.target,"token":candidate.token}),
-                    30,
+                    FEDERATION_TIMEOUT_SECONDS,
                 )
-                .await;
+                .await
+                .map_err(|e| membership_error(e, &c.target, "joining", &candidate.target));
+        }
+        Ok(current) if candidate.runtime_home.is_empty() => {
+            // An advertised address and loopback can identify the same runtime.
+            // Keep the verified local attachment used by filesystem blueprints.
+            candidate.runtime_home = current.runtime_home;
         }
         Err(e)
             if !matches!(
@@ -163,11 +179,40 @@ pub async fn connect(
     candidate.save_locked(root)?;
     Ok(candidate.public())
 }
+
+async fn ready(client: &Client, target: &str) -> Result<Value> {
+    client
+        .capabilities_when_ready(READINESS_TIMEOUT)
+        .await
+        .map_err(|mut e| {
+            if e.code == "MN_RUNTIME_UNAVAILABLE" {
+                e.message = format!("Could not verify the runtime at {target}.");
+                e.hint = Some(
+                    "Check the Core gRPC endpoint and that its native runtime service is ready."
+                        .into(),
+                );
+            }
+            e
+        })
+}
+
+fn membership_error(mut e: Error, entry: &str, action: &str, peer: &str) -> Error {
+    if e.code == "MN_RUNTIME_UNAVAILABLE" {
+        e.message = format!("The runtime at {entry} did not confirm {action} {peer}.");
+        e.hint = Some(
+            "Check membership with mn node list. Verify the two Cores can reach each other's gRPC endpoints from their runtime networks before retrying."
+                .into(),
+        );
+    }
+    e
+}
+
 pub async fn remove(root: &Path, name: &str) -> Result<Value> {
     let c = Connection::load(root)?;
     let v = Client::new(&c)?
         .command("node.remove", json!({"node_name":name}), 30)
-        .await?;
+        .await
+        .map_err(|e| membership_error(e, &c.target, "removing", name))?;
     if v["status"] != "removed" || v["node_name"] != name {
         return Err(Error::new(
             502,

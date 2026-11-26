@@ -2,10 +2,11 @@ pub use crate::nodes::{connect, remove};
 use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+#[cfg(not(target_os = "wasi"))]
 use std::os::unix::fs::{DirBuilderExt, OpenOptionsExt};
 use std::{
     env,
-    fs::{self, File, OpenOptions},
+    fs::{self},
     io::{ErrorKind, Write},
     path::{Path, PathBuf},
 };
@@ -125,7 +126,14 @@ impl Connection {
         Ok(())
     }
 }
-pub(crate) fn lock(root: &Path) -> Result<File> {
+#[cfg(target_os = "wasi")]
+pub(crate) fn lock(root: &Path) -> Result<std::net::TcpListener> {
+    fs::create_dir_all(root).map_err(|_| Error::storage())?;
+    crate::wasi::lock(root, ".client.lock").map_err(|_| Error::storage())
+}
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn lock(root: &Path) -> Result<std::fs::File> {
+    use std::fs::OpenOptions;
     fs::DirBuilder::new()
         .recursive(true)
         .mode(0o700)
@@ -185,6 +193,7 @@ pub fn target(input: &str, port: Option<u16>) -> Result<String> {
 }
 /// Complete the installer transaction while preserving identity and credentials.
 pub fn init_client(root: &Path) -> Result<()> {
+    #[cfg(not(target_os = "wasi"))]
     use std::os::unix::fs::PermissionsExt;
     let _lock = lock(root)?;
     let path = root.join("install_metadata.json");
@@ -202,14 +211,17 @@ pub fn init_client(root: &Path) -> Result<()> {
             {
                 return Err(Error::storage());
             }
+            #[cfg(not(target_os = "wasi"))]
             fs::set_permissions(&token, fs::Permissions::from_mode(0o600))
                 .map_err(|_| Error::storage())?;
         }
         Err(e) if e.kind() == ErrorKind::NotFound => {
-            use std::io::Read;
             let mut secret = [0u8; 32];
-            File::open("/dev/urandom")
-                .and_then(|mut f| f.read_exact(&mut secret))
+            #[cfg(target_os = "wasi")]
+            secret.copy_from_slice(&wasip2::random::random::get_random_bytes(32));
+            #[cfg(not(target_os = "wasi"))]
+            std::fs::File::open("/dev/urandom")
+                .and_then(|mut f| std::io::Read::read_exact(&mut f, &mut secret))
                 .map_err(|_| Error::storage())?;
             let mut f = tempfile::NamedTempFile::new_in(root).map_err(|_| Error::storage())?;
             use base64::Engine;
@@ -225,8 +237,12 @@ pub fn init_client(root: &Path) -> Result<()> {
         _ => return Err(Error::storage()),
     }
     meta["client_implementation"] = json!("rust");
-    meta["cli_version"] = json!(env!("CARGO_PKG_VERSION"));
-    meta["install_version"] = json!(env!("CARGO_PKG_VERSION"));
+    #[cfg(target_os = "wasi")]
+    {
+        meta["client_execution"] = json!("wasm32-wasip2");
+    }
+    meta["cli_version"] = json!(crate::release_version(env!("CARGO_PKG_VERSION")));
+    meta["install_version"] = json!(crate::release_version(env!("CARGO_PKG_VERSION")));
     let mut f = tempfile::NamedTempFile::new_in(root).map_err(|_| Error::storage())?;
     serde_json::to_writer_pretty(&f, &meta).map_err(|_| Error::storage())?;
     writeln!(f)

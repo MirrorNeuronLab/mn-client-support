@@ -4,7 +4,6 @@ use sha2::{Digest, Sha256};
 use std::{
     env, fs,
     path::{Path, PathBuf},
-    process::Stdio,
     time::Duration,
 };
 const DEFAULT_REPO: &str = "https://github.com/MirrorNeuronLab/mn-blueprints.git";
@@ -75,28 +74,41 @@ pub(super) async fn source(home: &Path, explicit: Option<&str>) -> Result<PathBu
     fs::create_dir_all(parent).map_err(|_| unavailable())?;
     let staging = tempfile::tempdir_in(parent).map_err(|_| unavailable())?;
     let tree = staging.path().join("checkout");
-    let mut cmd = tokio::process::Command::new("git");
-    cmd.args([
-        "clone",
-        "--depth",
-        "1",
-        "--recurse-submodules",
-        "--shallow-submodules",
-        "--",
-        &repo,
-    ])
-    .arg(&tree)
-    .env("GIT_TERMINAL_PROMPT", "0")
-    .stdin(Stdio::null())
-    .stdout(Stdio::null())
-    .stderr(Stdio::null())
-    .kill_on_drop(true);
-    if !tokio::time::timeout(Duration::from_secs(90), cmd.status())
-        .await
-        .map_err(|_| unavailable())?
-        .map_err(|_| unavailable())?
-        .success()
-    {
+    #[cfg(target_os = "wasi")]
+    let cloned = crate::wasi::utility(
+        "git-clone",
+        &[&repo, tree.to_str().ok_or_else(unavailable)?],
+        Duration::from_secs(90),
+    )
+    .await
+    .map_err(|_| unavailable())?
+    .0;
+    #[cfg(not(target_os = "wasi"))]
+    let cloned = {
+        use std::process::Stdio;
+        let mut cmd = tokio::process::Command::new("git");
+        cmd.args([
+            "clone",
+            "--depth",
+            "1",
+            "--recurse-submodules",
+            "--shallow-submodules",
+            "--",
+            &repo,
+        ])
+        .arg(&tree)
+        .env("GIT_TERMINAL_PROMPT", "0")
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .kill_on_drop(true);
+        tokio::time::timeout(Duration::from_secs(90), cmd.status())
+            .await
+            .map_err(|_| unavailable())?
+            .map_err(|_| unavailable())?
+            .success()
+    };
+    if !cloned {
         return Err(unavailable());
     }
     if !tree.join("index.json").is_file() {

@@ -11,10 +11,27 @@ use std::{
     future::Future,
     path::{Path, PathBuf},
     pin::Pin,
-    process::Stdio,
     sync::Mutex,
 };
-use tokio::process::{Child, ChildStdin, ChildStdout, Command};
+#[cfg(not(target_os = "wasi"))]
+use {
+    std::process::Stdio,
+    tokio::process::{Child, ChildStdin, ChildStdout, Command},
+};
+#[cfg(target_os = "wasi")]
+type ChildStdin = Box<dyn tokio::io::AsyncWrite + Unpin + Send + Sync>;
+#[cfg(target_os = "wasi")]
+type ChildStdout = Box<dyn tokio::io::AsyncRead + Unpin + Send + Sync>;
+#[cfg(target_os = "wasi")]
+struct Child(Option<tokio::task::JoinHandle<anyhow::Result<()>>>);
+#[cfg(target_os = "wasi")]
+impl Drop for Child {
+    fn drop(&mut self) {
+        if let Some(task) = &self.0 {
+            task.abort();
+        }
+    }
+}
 pub use w::Frame;
 pub use w::Reply as FrameMetadata;
 use wrpc_transport::{
@@ -103,6 +120,7 @@ fn reply(r: w::Reply) -> Result<Reply> {
 #[derive(Clone)]
 pub struct Adapter {
     home: PathBuf,
+    #[cfg(not(target_os = "wasi"))]
     helper: Option<PathBuf>,
     revision: Option<String>,
 }
@@ -110,6 +128,7 @@ impl Adapter {
     pub fn new(root: &Path) -> Self {
         Self {
             home: root.into(),
+            #[cfg(not(target_os = "wasi"))]
             helper: std::env::current_exe()
                 .and_then(std::fs::canonicalize)
                 .ok()
@@ -117,7 +136,33 @@ impl Adapter {
             revision: None,
         }
     }
-    fn open(&self) -> Result<(Child, Pipes)> {
+    #[cfg(target_os = "wasi")]
+    async fn open(&self) -> Result<(Child, Pipes)> {
+        if let Some(dir) = std::env::var_os("MN_WASI_SUPPORT_DIR") {
+            let socket = crate::session::connect(std::path::Path::new(&dir))
+                .await
+                .map_err(|_| unavailable())?;
+            let (rx, tx) = socket.into_split();
+            return Ok((
+                Child(None),
+                Pipes(Mutex::new(Some((Box::new(tx), Box::new(rx))))),
+            ));
+        }
+        // A standalone Wasmtime invocation can also use its linked support implementation.
+        // Each invocation gets the same private, bounded WIT byte transport as a
+        // stdio invocation. WASI has no process-spawn capability.
+        let (consumer, service) = tokio::io::duplex(128 * 1024);
+        let (rx, tx) = tokio::io::split(consumer);
+        let (read, write) = tokio::io::split(service);
+        let task = tokio::spawn(crate::backend::serve_pipes(self.home.clone(), read, write));
+        Ok((
+            Child(Some(task)),
+            Pipes(Mutex::new(Some((Box::new(tx), Box::new(rx))))),
+        ))
+    }
+
+    #[cfg(not(target_os = "wasi"))]
+    async fn open(&self) -> Result<(Child, Pipes)> {
         let helper = self.helper.as_ref().ok_or_else(unavailable)?;
         let mut child = Command::new(helper)
             .arg("serve-stdio")
@@ -140,23 +185,23 @@ impl Adapter {
         port: Option<u16>,
         local: Option<&str>,
     ) -> Result<Value> {
-        let (_child, p) = self.open()?;
+        let (_child, p) = self.open().await?;
         value(result(w::connect(&p, (), host, token, port, local).await)?)
     }
     pub async fn remove(&self, node: &str) -> Result<Value> {
-        let (_child, p) = self.open()?;
+        let (_child, p) = self.open().await?;
         value(result(w::remove_node(&p, (), node).await)?)
     }
     pub async fn status(&self) -> Result<Value> {
-        let (_child, p) = self.open()?;
+        let (_child, p) = self.open().await?;
         value(result(w::status(&p, ()).await)?)
     }
     pub async fn catalog(&self, repo: Option<&str>, category: Option<&str>) -> Result<Value> {
-        let (_child, p) = self.open()?;
+        let (_child, p) = self.open().await?;
         value(result(w::list_blueprints(&p, (), repo, category).await)?)
     }
     pub async fn pin(&self) -> Result<(Self, String)> {
-        let (_child, p) = self.open()?;
+        let (_child, p) = self.open().await?;
         let (revision, runtime_home) = result(w::pin(&p, ()).await)?;
         if self
             .revision
@@ -211,7 +256,7 @@ impl Adapter {
         id: &str,
         seconds: u32,
     ) -> Result<Reply> {
-        let (_child, p) = self.open()?;
+        let (_child, p) = self.open().await?;
         reply(result(
             w::invoke(&p, (), &self.request(method, action, args, id, seconds)).await,
         )?)
@@ -227,14 +272,14 @@ impl Adapter {
         action: &str,
         args: Value,
     ) -> Result<(Reply, Chunks)> {
-        let (child, p) = self.open()?;
+        let (child, p) = self.open().await?;
         let req = self.request(method, action, args, "", 0);
         let (res, io) = w::observe(&p, (), &req).await.map_err(|_| unavailable())?;
         let (meta, chunks) = res.map_err(Error::from)?;
         Ok((reply(meta)?, drive(child, chunks, io)))
     }
     pub async fn upload(&self, action: &str, args: Value, chunks: Chunks) -> Result<Reply> {
-        let (_child, p) = self.open()?;
+        let (_child, p) = self.open().await?;
         let req = self.request(Method::Execute, action, args, "", 3600);
         let (res, io) = w::upload(
             &p,
@@ -255,7 +300,7 @@ impl Adapter {
         args: Value,
         outgoing: Pin<Box<dyn Stream<Item = Frame> + Send>>,
     ) -> Result<UiFrames> {
-        let (child, p) = self.open()?;
+        let (child, p) = self.open().await?;
         let data = args.to_string();
         let (res, io) = w::job_ui(&p, (), &data, Box::pin(outgoing.map(|f| vec![f])))
             .await

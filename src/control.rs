@@ -2,11 +2,17 @@ use crate::{Error, Result, connection::Connection};
 use futures_util::{Stream, StreamExt};
 use serde_json::Value;
 use std::{collections::HashMap, pin::Pin, time::Duration};
+#[cfg(not(target_os = "wasi"))]
+use tonic::transport::{Channel, Endpoint};
 use tonic::{
     Code, Request, Status, Streaming,
     metadata::{Ascii, MetadataValue},
-    transport::{Channel, Endpoint},
 };
+#[cfg(target_os = "wasi")]
+mod channel;
+#[cfg(target_os = "wasi")]
+use channel::Channel;
+
 pub mod wire {
     tonic::include_proto!("mirrorneuron.runtime.v1");
 }
@@ -191,15 +197,20 @@ pub struct Client {
 }
 impl Client {
     pub fn new(c: &Connection) -> Result<Self> {
+        #[cfg(not(target_os = "wasi"))]
         let endpoint = Endpoint::from_shared(format!("http://{}", c.target))
             .map_err(|_| Error::storage())?
             .connect_timeout(Duration::from_secs(10));
+        #[cfg(not(target_os = "wasi"))]
+        let channel = endpoint.connect_lazy();
+        #[cfg(target_os = "wasi")]
+        let channel = Channel::new(&c.target)?;
         let mut auth: MetadataValue<Ascii> = format!("Bearer {}", c.token)
             .parse()
             .map_err(|_| Error::storage())?;
         auth.set_sensitive(true);
         Ok(Self {
-            stub: RuntimeControlServiceClient::new(endpoint.connect_lazy())
+            stub: RuntimeControlServiceClient::new(channel)
                 .max_encoding_message_size(MESSAGE_BYTES)
                 .max_decoding_message_size(MESSAGE_BYTES),
             auth,
@@ -224,15 +235,48 @@ impl Client {
     ) -> Result<Reply> {
         let mut stub = self.stub.clone();
         let req = self.authenticated(request(action, args, id), Some(timeout));
-        let result = match method {
-            Method::Capabilities => stub.get_capabilities(req).await,
-            Method::Read => stub.read(req).await,
-            Method::Prepare => stub.prepare(req).await,
-            Method::Execute => stub.execute(req).await,
-            Method::Catalog => stub.catalog(req).await,
-            _ => return Err(Error::protocol()),
+        let invoke = async {
+            let response = match method {
+                Method::Capabilities => stub.get_capabilities(req).await,
+                Method::Read => stub.read(req).await,
+                Method::Prepare => stub.prepare(req).await,
+                Method::Execute => stub.execute(req).await,
+                Method::Catalog => stub.catalog(req).await,
+                _ => return Err(Error::protocol()),
+            };
+            Reply::decode(response.map_err(transport)?.into_inner())
         };
-        Reply::decode(result.map_err(transport)?.into_inner())
+        tokio::time::timeout(timeout, invoke)
+            .await
+            .map_err(|_| transport(Status::deadline_exceeded("runtime deadline")))?
+    }
+    /// Core's port can open before its native runtime is ready. Only the
+    /// read-only handshake may be repeated during connection setup.
+    pub(crate) async fn capabilities_when_ready(&self, budget: Duration) -> Result<Value> {
+        use tokio::time::{Instant, sleep, timeout_at};
+
+        let end = Instant::now() + budget;
+        let mut stub = self.stub.clone();
+        let probe = async {
+            loop {
+                let req = self.authenticated(
+                    request("runtime.capabilities", serde_json::json!({}), ""),
+                    Some(end.saturating_duration_since(Instant::now())),
+                );
+                match stub.get_capabilities(req).await {
+                    Ok(reply) => match Reply::decode(reply.into_inner()).and_then(Reply::checked) {
+                        Err(e) if e.code == "MN_RUNTIME_UNAVAILABLE" => {}
+                        result => return result,
+                    },
+                    Err(status) if status.code() == Code::Unavailable => {}
+                    Err(status) => return Err(transport(status)),
+                }
+                sleep(Duration::from_millis(500)).await;
+            }
+        };
+        timeout_at(end, probe)
+            .await
+            .unwrap_or_else(|_| Err(transport(Status::unavailable("runtime startup"))))
     }
     pub async fn command(&self, action: &str, args: Value, seconds: u64) -> Result<Value> {
         self.call(

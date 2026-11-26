@@ -1,6 +1,6 @@
 [package]
 name = "mn-client-support"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2024"
 license = "MIT"
 description = "Native MirrorNeuron runtime control client"
@@ -20,8 +20,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
 tempfile = "3"
-tokio = { version = "1", features = ["fs", "io-util", "process", "time", "rt", "macros", "sync", "io-std", "rt-multi-thread"] }
-tonic = "0.14"
 tonic-prost = "0.14"
 url = "2"
 
@@ -31,3 +29,17 @@ tonic-prost-build = "0.14"
 
 [dependencies.wit-bindgen-wrpc]
 version = "0.10"
+
+[target.'cfg(not(target_os = "wasi"))'.dependencies]
+tokio = { version = "1", features = ["fs", "io-util", "process", "time", "rt", "macros", "sync", "io-std", "rt-multi-thread"] }
+tonic = "0.14"
+
+[target.'cfg(target_os = "wasi")'.dependencies]
+tokio = { version = "1", features = ["rt", "net", "io-util", "time", "macros", "sync"] }
+tonic = { version = "0.14", default-features = false, features = ["codegen"] }
+hyper = { version = "1", features = ["client", "http2"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
+tower-service = "0.3"
+wasip2 = "1"
+hmac = "0.13"
+sha2-current = { package = "sha2", version = "0.11" }

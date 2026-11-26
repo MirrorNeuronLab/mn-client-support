@@ -112,7 +112,7 @@ impl Endpoint {
         match self.action.as_str() {
             "delete_job" | "delete_run" => 330,
             "update_job" if b["status"] == "archived" => 330,
-            "create_job" | "replace_job_bundle" | "create_job_run" => 3600,
+            "create_job" | "replace_job_bundle" | "create_job_run" | "retry_run" => 3600,
             "update_job"
                 if b["refresh_contract"] == true || !b["resolved_configuration"].is_null() =>
             {

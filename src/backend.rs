@@ -226,43 +226,110 @@ impl w::Handler<()> for Backend {
             .map_err(Into::into))
     }
 }
-// Rust's process stdout is line buffered. A raw pipe writer must deliver every
-// binary frame immediately, including an open WebSocket's first response.
-type OutputPipe = tokio::fs::File;
-struct Stdio;
-impl wrpc_transport::Accept for Stdio {
+// A server belongs to one caller. Flush completion must be scoped to that
+// invocation when multiple API requests run in the same WASI process.
+struct Pipes<R, W>(std::sync::Mutex<Option<(W, R)>>);
+impl<
+    R: tokio::io::AsyncRead + Unpin + Send + Sync + 'static,
+    W: tokio::io::AsyncWrite + Unpin + Send + Sync + 'static,
+> wrpc_transport::Accept for Pipes<R, W>
+{
     type Context = ();
-    type Outgoing = OutputPipe;
-    type Incoming = tokio::io::Stdin;
-    async fn accept(&self) -> io::Result<((), Self::Outgoing, Self::Incoming)> {
-        use std::os::fd::AsFd;
-        let fd = std::io::stdout().as_fd().try_clone_to_owned()?;
-        Ok((
-            (),
-            OutputPipe::from_std(std::fs::File::from(fd)),
-            tokio::io::stdin(),
-        ))
+    type Incoming = R;
+    type Outgoing = W;
+    async fn accept(&self) -> io::Result<((), W, R)> {
+        let (w, r) = self
+            .0
+            .lock()
+            .unwrap()
+            .take()
+            .ok_or_else(|| io::Error::other("session already opened"))?;
+        Ok(((), w, r))
     }
 }
-struct FlushStdout;
-static FLUSHED: tokio::sync::Notify = tokio::sync::Notify::const_new();
-impl wrpc_transport::frame::ConnHandler<tokio::io::Stdin, OutputPipe> for FlushStdout {
-    async fn on_egress(mut tx: OutputPipe, _: io::Result<()>) {
+
+struct Output<W> {
+    pipe: W,
+    flushed: std::sync::Arc<tokio::sync::Notify>,
+}
+impl<W: tokio::io::AsyncWrite + Unpin> tokio::io::AsyncWrite for Output<W> {
+    fn poll_write(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+        bytes: &[u8],
+    ) -> std::task::Poll<io::Result<usize>> {
+        Pin::new(&mut self.pipe).poll_write(cx, bytes)
+    }
+    fn poll_flush(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<io::Result<()>> {
+        Pin::new(&mut self.pipe).poll_flush(cx)
+    }
+    fn poll_shutdown(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<io::Result<()>> {
+        Pin::new(&mut self.pipe).poll_shutdown(cx)
+    }
+}
+struct Flush;
+impl<
+    R: tokio::io::AsyncRead + Unpin + Send + Sync + 'static,
+    W: tokio::io::AsyncWrite + Unpin + Send + Sync + 'static,
+> wrpc_transport::frame::ConnHandler<R, Output<W>> for Flush
+{
+    async fn on_egress(mut tx: Output<W>, _: io::Result<()>) {
         use tokio::io::AsyncWriteExt;
         let _ = tx.flush().await;
-        FLUSHED.notify_one();
+        tx.flushed.notify_one();
     }
 }
-pub async fn serve() -> anyhow::Result<()> {
-    let server = wrpc_transport::Server::<(), tokio::io::Stdin, OutputPipe, FlushStdout>::new();
-    let registrations = backend::serve(&server, Backend(connection::home()?)).await?;
-    server.accept(Stdio).await?;
+pub(crate) async fn serve_pipes<R, W>(root: PathBuf, read: R, write: W) -> anyhow::Result<()>
+where
+    R: tokio::io::AsyncRead + Unpin + Send + Sync + 'static,
+    W: tokio::io::AsyncWrite + Unpin + Send + Sync + 'static,
+{
+    let flushed = std::sync::Arc::new(tokio::sync::Notify::new());
+    let server = wrpc_transport::Server::<(), R, Output<W>, Flush>::new();
+    let registrations = backend::serve(&server, Backend(root)).await?;
+    server
+        .accept(Pipes(std::sync::Mutex::new(Some((
+            Output {
+                pipe: write,
+                flushed: flushed.clone(),
+            },
+            read,
+        )))))
+        .await?;
     let mut calls = stream::select_all(registrations.into_iter().map(|(_, _, s)| s));
-    let invocation = calls
+    calls
         .next()
         .await
-        .ok_or_else(|| anyhow::anyhow!("support invocation closed"))??;
-    invocation.await?;
-    FLUSHED.notified().await;
+        .ok_or_else(|| anyhow::anyhow!("support invocation closed"))??
+        .await?;
+    flushed.notified().await;
     Ok(())
+}
+pub async fn serve() -> anyhow::Result<()> {
+    #[cfg(not(target_os = "wasi"))]
+    {
+        use std::os::fd::AsFd;
+        let fd = std::io::stdout().as_fd().try_clone_to_owned()?;
+        serve_pipes(
+            connection::home()?,
+            tokio::io::stdin(),
+            tokio::fs::File::from_std(std::fs::File::from(fd)),
+        )
+        .await
+    }
+    #[cfg(target_os = "wasi")]
+    {
+        serve_pipes(
+            connection::home()?,
+            crate::wasi::stdin(),
+            crate::wasi::stdout(),
+        )
+        .await
+    }
 }
