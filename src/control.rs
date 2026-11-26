@@ -68,7 +68,7 @@ impl Reply {
                 .as_i64()
                 .and_then(|n| i32::try_from(n).ok())
                 .unwrap_or(error.exit_code);
-            error.details = e["details"].clone();
+            *error.details = e["details"].clone();
             error.hint = e["hint"].as_str().map(str::to_owned);
             *error.headers = reply.metadata;
             return Err(error);

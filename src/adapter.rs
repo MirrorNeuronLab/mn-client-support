@@ -64,7 +64,7 @@ impl From<w::Failure> for Error {
             status: e.status,
             exit_code: e.exit_code,
             hint: e.hint,
-            details: serde_json::from_str(&e.details_json).unwrap_or(Value::Null),
+            details: Box::new(serde_json::from_str(&e.details_json).unwrap_or(Value::Null)),
             headers: Box::new(e.headers.into_iter().collect()),
         }
     }
@@ -158,6 +158,17 @@ impl Adapter {
     pub async fn pin(&self) -> Result<(Self, String)> {
         let (_child, p) = self.open()?;
         let (revision, runtime_home) = result(w::pin(&p, ()).await)?;
+        if self
+            .revision
+            .as_ref()
+            .is_some_and(|expected| expected != &revision)
+        {
+            return Err(Error::new(
+                409,
+                "MN_CLIENT_CONNECTION_CHANGED",
+                "The active connection changed during this operation.",
+            ));
+        }
         Ok((
             Self {
                 revision: Some(revision),
