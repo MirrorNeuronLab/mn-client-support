@@ -1,4 +1,0 @@
-mirrorneuron-sdk-contracts<2,>=1.4.1.dev108
-
-[http]
-httpx<1,>=0.27
