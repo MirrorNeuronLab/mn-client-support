@@ -1,0 +1,41 @@
+package mirrorneuron:client@1.0.0;
+
+/// One client adapter and its support service share a private transport.
+interface support {
+    record failure {
+        code: string,
+        message: string,
+        status: u16,
+        exit-code: s32,
+        hint: option<string>,
+        details-json: string,
+        headers: list<tuple<string,string>>,
+    }
+    record reply {
+        status: u16,
+        headers: list<tuple<string,string>>,
+        value-json: option<string>,
+    }
+    enum method { capabilities, catalog, prepare, execute, read, events, read-file }
+    record call {
+        profile-revision: option<string>,
+        rpc: method,
+        action: string,
+        arguments-json: string,
+        request-id: string,
+        timeout-seconds: u32,
+    }
+    record frame { kind: string, data: list<u8>, metadata: option<reply> }
+    connect: func(host: string, token: option<string>, port: option<u16>, runtime-home: option<string>) -> result<string, failure>;
+    remove-node: func(node: string) -> result<string, failure>;
+    status: func() -> result<string, failure>;
+    list-blueprints: func(repository: option<string>, category: option<string>) -> result<string, failure>;
+    /// Pins a multi-call operation to the profile used for its first read.
+    pin: func() -> result<tuple<string, string>, failure>;
+    invoke: func(request: call) -> result<reply, failure>;
+    observe: func(request: call) -> result<tuple<reply, stream<result<list<u8>, failure>>>, failure>;
+    upload: func(request: call, chunks: stream<result<list<u8>, failure>>) -> result<reply, failure>;
+    job-ui: func(arguments-json: string, outgoing: stream<frame>) -> result<stream<result<frame, failure>>, failure>;
+}
+world client { import support; }
+world backend { export support; }

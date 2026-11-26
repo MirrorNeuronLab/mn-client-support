@@ -1,0 +1,2625 @@
+[
+  {
+    "action": "create_bundle",
+    "module": "routes.bundles",
+    "handler": "upload_bundle",
+    "method": "POST",
+    "path": "/bundles",
+    "status": 201,
+    "parameters": {
+      "response": {
+        "source": "response",
+        "name": "response"
+      },
+      "bundle": {
+        "source": "upload",
+        "name": "bundle"
+      },
+      "_auth": {
+        "source": "principal",
+        "name": "_auth"
+      }
+    }
+  },
+  {
+    "action": "evaluate_assistance",
+    "module": "routes.v1.assistance",
+    "handler": "evaluate",
+    "method": "POST",
+    "path": "/assistance/evaluations",
+    "status": 200,
+    "parameters": {
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_launch_progress",
+    "module": "routes.v1.blueprints",
+    "handler": "get_launch_progress",
+    "method": "GET",
+    "path": "/launch-progress/{progress_id}",
+    "status": 200,
+    "parameters": {
+      "progress_id": {
+        "source": "path",
+        "name": "progress_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_blueprint",
+    "module": "routes.v1.blueprints",
+    "handler": "get_blueprint",
+    "method": "GET",
+    "path": "/blueprints/{blueprint_id}",
+    "status": 200,
+    "parameters": {
+      "blueprint_id": {
+        "source": "path",
+        "name": "blueprint_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "create_blueprint_addition",
+    "module": "routes.v1.blueprints",
+    "handler": "create_blueprint_addition",
+    "method": "POST",
+    "path": "/blueprints/{blueprint_id}/additions",
+    "status": 202,
+    "parameters": {
+      "blueprint_id": {
+        "source": "path",
+        "name": "blueprint_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_blueprint_removal",
+    "module": "routes.v1.blueprints",
+    "handler": "create_blueprint_removal",
+    "method": "POST",
+    "path": "/blueprints/{blueprint_id}/removals",
+    "status": 202,
+    "parameters": {
+      "blueprint_id": {
+        "source": "path",
+        "name": "blueprint_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_blueprint_validation",
+    "module": "routes.v1.blueprints",
+    "handler": "create_blueprint_validation",
+    "method": "POST",
+    "path": "/blueprints/{blueprint_id}/validations",
+    "status": 201,
+    "parameters": {
+      "blueprint_id": {
+        "source": "path",
+        "name": "blueprint_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "create_blueprint_run",
+    "module": "routes.v1.blueprints",
+    "handler": "create_blueprint_run",
+    "method": "POST",
+    "path": "/blueprints/{blueprint_id}/runs",
+    "status": 202,
+    "parameters": {
+      "blueprint_id": {
+        "source": "path",
+        "name": "blueprint_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      },
+      "progress_id": {
+        "source": "header",
+        "name": "X-Launch-Progress-ID"
+      }
+    }
+  },
+  {
+    "action": "create_blueprint_catalog_refresh",
+    "module": "routes.v1.blueprints",
+    "handler": "create_blueprint_catalog_refresh",
+    "method": "POST",
+    "path": "/blueprint-catalog-refreshes",
+    "status": 202,
+    "parameters": {
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_blueprint_cleanup",
+    "module": "routes.v1.blueprints",
+    "handler": "create_blueprint_cleanup",
+    "method": "POST",
+    "path": "/blueprint-cleanups",
+    "status": 202,
+    "parameters": {
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_models",
+    "module": "routes.v1.infrastructure",
+    "handler": "list_models",
+    "method": "GET",
+    "path": "/models",
+    "status": 200,
+    "parameters": {
+      "installed_only": {
+        "source": "query",
+        "name": "installed_only"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_model",
+    "module": "routes.v1.infrastructure",
+    "handler": "get_model",
+    "method": "GET",
+    "path": "/models/{model_id:path}",
+    "status": 200,
+    "parameters": {
+      "model_id": {
+        "source": "path",
+        "name": "model_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "replace_model_installation",
+    "module": "routes.v1.infrastructure",
+    "handler": "replace_model_installation",
+    "method": "PUT",
+    "path": "/models/{model_id:path}/installation",
+    "status": 202,
+    "parameters": {
+      "model_id": {
+        "source": "path",
+        "name": "model_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "delete_model_installation",
+    "module": "routes.v1.infrastructure",
+    "handler": "delete_model_installation",
+    "method": "DELETE",
+    "path": "/models/{model_id:path}/installation",
+    "status": 202,
+    "parameters": {
+      "model_id": {
+        "source": "path",
+        "name": "model_id"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_model_benchmark",
+    "module": "routes.v1.infrastructure",
+    "handler": "create_model_benchmark",
+    "method": "POST",
+    "path": "/models/{model_id:path}/benchmarks",
+    "status": 201,
+    "parameters": {
+      "model_id": {
+        "source": "path",
+        "name": "model_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_model_remotes",
+    "module": "routes.v1.infrastructure",
+    "handler": "list_model_remotes",
+    "method": "GET",
+    "path": "/model-remotes",
+    "status": 200,
+    "parameters": {
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_model_remote",
+    "module": "routes.v1.infrastructure",
+    "handler": "create_model_remote",
+    "method": "POST",
+    "path": "/model-remotes",
+    "status": 201,
+    "parameters": {
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "response": {
+        "source": "response",
+        "name": "response"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "delete_model_remote",
+    "module": "routes.v1.infrastructure",
+    "handler": "delete_model_remote",
+    "method": "DELETE",
+    "path": "/model-remotes/{name}",
+    "status": 204,
+    "parameters": {
+      "name": {
+        "source": "path",
+        "name": "name"
+      },
+      "if_match": {
+        "source": "header",
+        "name": "If-Match"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_model_proxy",
+    "module": "routes.v1.infrastructure",
+    "handler": "create_model_proxy",
+    "method": "POST",
+    "path": "/model-proxies",
+    "status": 201,
+    "parameters": {
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "response": {
+        "source": "response",
+        "name": "response"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_model_proxies",
+    "module": "routes.v1.infrastructure",
+    "handler": "list_model_proxies",
+    "method": "GET",
+    "path": "/model-proxies",
+    "status": 200,
+    "parameters": {
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "delete_model_proxy",
+    "module": "routes.v1.infrastructure",
+    "handler": "delete_model_proxy",
+    "method": "DELETE",
+    "path": "/model-proxies/{model_id:path}",
+    "status": 204,
+    "parameters": {
+      "model_id": {
+        "source": "path",
+        "name": "model_id"
+      },
+      "if_match": {
+        "source": "header",
+        "name": "If-Match"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_services",
+    "module": "routes.v1.infrastructure",
+    "handler": "list_services",
+    "method": "GET",
+    "path": "/services",
+    "status": 200,
+    "parameters": {
+      "name": {
+        "source": "query",
+        "name": "name"
+      },
+      "node": {
+        "source": "query",
+        "name": "node"
+      },
+      "job_id": {
+        "source": "query",
+        "name": "job_id"
+      },
+      "agent_id": {
+        "source": "query",
+        "name": "agent_id"
+      },
+      "service_status": {
+        "source": "query",
+        "name": "service_status"
+      },
+      "tag": {
+        "source": "body",
+        "name": "tag"
+      },
+      "passing_only": {
+        "source": "query",
+        "name": "passing_only"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_service_resolution",
+    "module": "routes.v1.infrastructure",
+    "handler": "get_service_resolution",
+    "method": "GET",
+    "path": "/services/{name}/resolution",
+    "status": 200,
+    "parameters": {
+      "name": {
+        "source": "path",
+        "name": "name"
+      },
+      "node": {
+        "source": "query",
+        "name": "node"
+      },
+      "job_id": {
+        "source": "query",
+        "name": "job_id"
+      },
+      "agent_id": {
+        "source": "query",
+        "name": "agent_id"
+      },
+      "tag": {
+        "source": "body",
+        "name": "tag"
+      },
+      "passing_only": {
+        "source": "query",
+        "name": "passing_only"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_service_check",
+    "module": "routes.v1.infrastructure",
+    "handler": "create_service_check",
+    "method": "POST",
+    "path": "/service-checks",
+    "status": 201,
+    "parameters": {
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_interactions",
+    "module": "routes.v1.interactions",
+    "handler": "list_interactions",
+    "method": "GET",
+    "path": "/interactions",
+    "status": 200,
+    "parameters": {
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "stream_interactions",
+    "module": "routes.v1.interactions",
+    "handler": "stream_interactions",
+    "method": "GET",
+    "path": "/interactions/events/stream",
+    "status": 200,
+    "parameters": {
+      "request": {
+        "source": "context",
+        "name": "request"
+      },
+      "last_event_id": {
+        "source": "body",
+        "name": "last_event_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_interaction",
+    "module": "routes.v1.interactions",
+    "handler": "get_interaction",
+    "method": "GET",
+    "path": "/interactions/{interaction_id}",
+    "status": 200,
+    "parameters": {
+      "interaction_id": {
+        "source": "path",
+        "name": "interaction_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "respond",
+    "module": "routes.v1.interactions",
+    "handler": "respond",
+    "method": "POST",
+    "path": "/interactions/{interaction_id}/responses",
+    "status": 200,
+    "parameters": {
+      "interaction_id": {
+        "source": "path",
+        "name": "interaction_id"
+      },
+      "body": {
+        "source": "body",
+        "name": "body"
+      },
+      "idempotency_key": {
+        "source": "body",
+        "name": "idempotency_key"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "acknowledge",
+    "module": "routes.v1.interactions",
+    "handler": "acknowledge",
+    "method": "POST",
+    "path": "/interactions/{interaction_id}/acknowledgements",
+    "status": 200,
+    "parameters": {
+      "interaction_id": {
+        "source": "path",
+        "name": "interaction_id"
+      },
+      "body": {
+        "source": "body",
+        "name": "body"
+      },
+      "idempotency_key": {
+        "source": "body",
+        "name": "idempotency_key"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "create_session",
+    "module": "routes.v1.interactions",
+    "handler": "create_session",
+    "method": "POST",
+    "path": "/interaction-test-sessions",
+    "status": 201,
+    "parameters": {
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "example",
+    "module": "routes.v1.interactions",
+    "handler": "example",
+    "method": "POST",
+    "path": "/interaction-test-sessions/{session_id}/examples",
+    "status": 200,
+    "parameters": {
+      "session_id": {
+        "source": "path",
+        "name": "session_id"
+      },
+      "body": {
+        "source": "body",
+        "name": "body"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "close_session",
+    "module": "routes.v1.interactions",
+    "handler": "close_session",
+    "method": "DELETE",
+    "path": "/interaction-test-sessions/{session_id}",
+    "status": 200,
+    "parameters": {
+      "session_id": {
+        "source": "path",
+        "name": "session_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "create_job_backup",
+    "module": "routes.v1.job_backups",
+    "handler": "create_backup",
+    "method": "POST",
+    "path": "/jobs/{job_id}/backups",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "_auth": {
+        "source": "principal",
+        "name": "_auth"
+      }
+    }
+  },
+  {
+    "action": "restore_job_backup",
+    "module": "routes.v1.job_backups",
+    "handler": "restore_backup",
+    "method": "POST",
+    "path": "/job-restorations",
+    "status": 201,
+    "parameters": {
+      "request": {
+        "source": "context",
+        "name": "request"
+      },
+      "start": {
+        "source": "query",
+        "name": "start"
+      },
+      "_auth": {
+        "source": "principal",
+        "name": "_auth"
+      },
+      "job_id": {
+        "source": "query",
+        "name": "job_id"
+      }
+    }
+  },
+  {
+    "action": "prepare_job",
+    "module": "routes.v1.job_preparations",
+    "handler": "prepare_job",
+    "method": "POST",
+    "path": "/job-preparations",
+    "status": 202,
+    "parameters": {
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "prepare_job_update",
+    "module": "routes.v1.job_preparations",
+    "handler": "prepare_job_update",
+    "method": "POST",
+    "path": "/jobs/{job_id}/preparations",
+    "status": 202,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "if_match": {
+        "source": "header",
+        "name": "If-Match"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "relocate_job",
+    "module": "routes.v1.jobs",
+    "handler": "relocate_job",
+    "method": "POST",
+    "path": "/jobs/{job_id}/relocations",
+    "status": 202,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_job",
+    "module": "routes.v1.jobs",
+    "handler": "create_job",
+    "method": "POST",
+    "path": "/jobs",
+    "status": 201,
+    "parameters": {
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      },
+      "progress_id": {
+        "source": "header",
+        "name": "X-Launch-Progress-ID"
+      }
+    }
+  },
+  {
+    "action": "list_jobs",
+    "module": "routes.v1.jobs",
+    "handler": "list_jobs",
+    "method": "GET",
+    "path": "/jobs",
+    "status": 200,
+    "parameters": {
+      "include_archived": {
+        "source": "query",
+        "name": "include_archived"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_job",
+    "module": "routes.v1.jobs",
+    "handler": "get_job",
+    "method": "GET",
+    "path": "/jobs/{job_id}",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_job_definition_dag",
+    "module": "routes.v1.jobs",
+    "handler": "get_job_definition_dag",
+    "method": "GET",
+    "path": "/jobs/{job_id}/workflow/definition/dag",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_job_definition_steps",
+    "module": "routes.v1.jobs",
+    "handler": "get_job_definition_steps",
+    "method": "GET",
+    "path": "/jobs/{job_id}/workflow/definition/steps",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_job_latest_run_dag",
+    "module": "routes.v1.jobs",
+    "handler": "get_job_latest_run_dag",
+    "method": "GET",
+    "path": "/jobs/{job_id}/workflow/latest-run/dag",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_job_latest_run_steps",
+    "module": "routes.v1.jobs",
+    "handler": "get_job_latest_run_steps",
+    "method": "GET",
+    "path": "/jobs/{job_id}/workflow/latest-run/steps",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_job_ui",
+    "module": "routes.v1.jobs",
+    "handler": "get_job_ui",
+    "method": "GET",
+    "path": "/jobs/{job_id}/ui",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      },
+      "check_readiness": {
+        "source": "query",
+        "name": "check_readiness"
+      }
+    }
+  },
+  {
+    "action": "update_job",
+    "module": "routes.v1.jobs",
+    "handler": "update_job",
+    "method": "PATCH",
+    "path": "/jobs/{job_id}",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "if_match": {
+        "source": "header",
+        "name": "If-Match"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "replace_job_bundle",
+    "module": "routes.v1.jobs",
+    "handler": "replace_job_bundle",
+    "method": "PUT",
+    "path": "/jobs/{job_id}/bundle",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "if_match": {
+        "source": "header",
+        "name": "If-Match"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "delete_job",
+    "module": "routes.v1.jobs",
+    "handler": "delete_job",
+    "method": "DELETE",
+    "path": "/jobs/{job_id}",
+    "status": 204,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "if_match": {
+        "source": "header",
+        "name": "If-Match"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "create_job_data_reset",
+    "module": "routes.v1.jobs",
+    "handler": "create_job_data_reset",
+    "method": "POST",
+    "path": "/jobs/{job_id}/data-resets",
+    "status": 202,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "check_job_run_admission",
+    "module": "routes.v1.jobs",
+    "handler": "check_job_run_admission",
+    "method": "POST",
+    "path": "/jobs/{job_id}/run-admission-checks",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "create_job_run",
+    "module": "routes.v1.jobs",
+    "handler": "create_job_run",
+    "method": "POST",
+    "path": "/jobs/{job_id}/runs",
+    "status": 202,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_job_run_operation",
+    "module": "routes.v1.jobs",
+    "handler": "create_job_run_operation",
+    "method": "POST",
+    "path": "/jobs/{job_id}/run-operations",
+    "status": 202,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_job_analysis",
+    "module": "routes.v1.jobs",
+    "handler": "get_job_analysis",
+    "method": "GET",
+    "path": "/jobs/{job_id}/analysis",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "context",
+        "name": "request"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_job_runs",
+    "module": "routes.v1.jobs",
+    "handler": "list_job_runs",
+    "method": "GET",
+    "path": "/jobs/{job_id}/runs",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "include_terminal": {
+        "source": "query",
+        "name": "include_terminal"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_runs",
+    "module": "routes.v1.jobs",
+    "handler": "list_runs",
+    "method": "GET",
+    "path": "/runs",
+    "status": 200,
+    "parameters": {
+      "include_terminal": {
+        "source": "query",
+        "name": "include_terminal"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_run",
+    "module": "routes.v1.jobs",
+    "handler": "get_run",
+    "method": "GET",
+    "path": "/runs/{run_id}",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "update_run",
+    "module": "routes.v1.jobs",
+    "handler": "update_run",
+    "method": "PATCH",
+    "path": "/runs/{run_id}",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "plan_run_retry",
+    "module": "routes.v1.jobs",
+    "handler": "plan_run_retry",
+    "method": "POST",
+    "path": "/runs/{run_id}/retry-plans",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "retry_run",
+    "module": "routes.v1.jobs",
+    "handler": "retry_run",
+    "method": "POST",
+    "path": "/runs/{run_id}/retries",
+    "status": 202,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "delete_run",
+    "module": "routes.v1.jobs",
+    "handler": "delete_run",
+    "method": "DELETE",
+    "path": "/runs/{run_id}",
+    "status": 204,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "create_job_schedule",
+    "module": "routes.v1.jobs",
+    "handler": "create_job_schedule",
+    "method": "POST",
+    "path": "/jobs/{job_id}/schedules",
+    "status": 201,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_schedules",
+    "module": "routes.v1.jobs",
+    "handler": "list_schedules",
+    "method": "GET",
+    "path": "/schedules",
+    "status": 200,
+    "parameters": {
+      "owner_node": {
+        "source": "query",
+        "name": "owner_node"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_schedule",
+    "module": "routes.v1.jobs",
+    "handler": "get_schedule",
+    "method": "GET",
+    "path": "/schedules/{schedule_id}",
+    "status": 200,
+    "parameters": {
+      "schedule_id": {
+        "source": "path",
+        "name": "schedule_id"
+      },
+      "owner_node": {
+        "source": "query",
+        "name": "owner_node"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "update_schedule",
+    "module": "routes.v1.jobs",
+    "handler": "update_schedule",
+    "method": "PATCH",
+    "path": "/schedules/{schedule_id}",
+    "status": 200,
+    "parameters": {
+      "schedule_id": {
+        "source": "path",
+        "name": "schedule_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "owner_node": {
+        "source": "query",
+        "name": "owner_node"
+      },
+      "if_match": {
+        "source": "header",
+        "name": "If-Match"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "delete_schedule",
+    "module": "routes.v1.jobs",
+    "handler": "delete_schedule",
+    "method": "DELETE",
+    "path": "/schedules/{schedule_id}",
+    "status": 200,
+    "parameters": {
+      "schedule_id": {
+        "source": "path",
+        "name": "schedule_id"
+      },
+      "owner_node": {
+        "source": "query",
+        "name": "owner_node"
+      },
+      "if_match": {
+        "source": "header",
+        "name": "If-Match"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_run_monitor",
+    "module": "routes.v1.jobs",
+    "handler": "get_run_monitor",
+    "method": "GET",
+    "path": "/runs/{run_id}/monitor",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_run_workflow_progress",
+    "module": "routes.v1.jobs",
+    "handler": "get_run_workflow_progress",
+    "method": "GET",
+    "path": "/runs/{run_id}/workflow-progress",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "list_run_logs",
+    "module": "routes.v1.jobs",
+    "handler": "list_run_logs",
+    "method": "GET",
+    "path": "/runs/{run_id}/logs",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "level": {
+        "source": "query",
+        "name": "level"
+      },
+      "since": {
+        "source": "query",
+        "name": "since"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_run_events",
+    "module": "routes.v1.jobs",
+    "handler": "list_run_events",
+    "method": "GET",
+    "path": "/runs/{run_id}/events",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "channel": {
+        "source": "query",
+        "name": "channel"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "stream_run_events",
+    "module": "routes.v1.jobs",
+    "handler": "stream_run_events",
+    "method": "GET",
+    "path": "/runs/{run_id}/events/stream",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "last_event_id": {
+        "source": "header",
+        "name": "Last-Event-ID"
+      },
+      "interval": {
+        "source": "query",
+        "name": "interval"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_run_resources",
+    "module": "routes.v1.jobs",
+    "handler": "get_run_resources",
+    "method": "GET",
+    "path": "/runs/{run_id}/resources",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "window": {
+        "source": "query",
+        "name": "window"
+      },
+      "bucket": {
+        "source": "query",
+        "name": "bucket"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_run_human_requests",
+    "module": "routes.v1.jobs",
+    "handler": "list_run_human_requests",
+    "method": "GET",
+    "path": "/runs/{run_id}/human-requests",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request_status": {
+        "source": "query",
+        "name": "request_status"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_run_human_response",
+    "module": "routes.v1.jobs",
+    "handler": "create_run_human_response",
+    "method": "POST",
+    "path": "/runs/{run_id}/human-requests/{request_id}/responses",
+    "status": 201,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request_id": {
+        "source": "path",
+        "name": "request_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_run_human_acknowledgement",
+    "module": "routes.v1.jobs",
+    "handler": "create_run_human_acknowledgement",
+    "method": "POST",
+    "path": "/runs/{run_id}/human-requests/{request_id}/acknowledgements",
+    "status": 201,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request_id": {
+        "source": "path",
+        "name": "request_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_run_final_artifact",
+    "module": "routes.v1.jobs",
+    "handler": "get_run_final_artifact",
+    "method": "GET",
+    "path": "/runs/{run_id}/artifacts/final",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request": {
+        "source": "context",
+        "name": "request"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_run_artifacts",
+    "module": "routes.v1.jobs",
+    "handler": "list_run_artifacts",
+    "method": "GET",
+    "path": "/runs/{run_id}/artifacts",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request": {
+        "source": "context",
+        "name": "request"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "download_run_artifact",
+    "module": "routes.v1.jobs",
+    "handler": "download_run_artifact",
+    "method": "GET",
+    "path": "/runs/{run_id}/artifacts/{artifact_path:path}",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "artifact_path": {
+        "source": "path",
+        "name": "artifact_path"
+      },
+      "request": {
+        "source": "context",
+        "name": "request"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_run_outputs",
+    "module": "routes.v1.jobs",
+    "handler": "list_run_outputs",
+    "method": "GET",
+    "path": "/runs/{run_id}/outputs",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request": {
+        "source": "context",
+        "name": "request"
+      },
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "download_run_output",
+    "module": "routes.v1.jobs",
+    "handler": "download_run_output",
+    "method": "GET",
+    "path": "/runs/{run_id}/outputs/{output_index}",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "output_index": {
+        "source": "path",
+        "name": "output_index"
+      },
+      "request": {
+        "source": "context",
+        "name": "request"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_run_observability",
+    "module": "routes.v1.jobs",
+    "handler": "get_run_observability",
+    "method": "GET",
+    "path": "/runs/{run_id}/observability",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_run_snapshot",
+    "module": "routes.v1.jobs",
+    "handler": "get_run_snapshot",
+    "method": "GET",
+    "path": "/runs/{run_id}/snapshots",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_run_agent_graph",
+    "module": "routes.v1.jobs",
+    "handler": "get_run_agent_graph",
+    "method": "GET",
+    "path": "/runs/{run_id}/agent-graph",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "export_run",
+    "module": "routes.v1.jobs",
+    "handler": "export_run",
+    "method": "GET",
+    "path": "/runs/{run_id}/export",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "format": {
+        "source": "query",
+        "name": "format"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_operations",
+    "module": "routes.v1.operations",
+    "handler": "list_operations",
+    "method": "GET",
+    "path": "/operations",
+    "status": 200,
+    "parameters": {
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "get_operation",
+    "module": "routes.v1.operations",
+    "handler": "operation",
+    "method": "GET",
+    "path": "/operations/{operation_id}",
+    "status": 200,
+    "parameters": {
+      "operation_id": {
+        "source": "path",
+        "name": "operation_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "stream_operation_events",
+    "module": "routes.v1.operations",
+    "handler": "stream_operation_events",
+    "method": "GET",
+    "path": "/operations/{operation_id}/events/stream",
+    "status": 200,
+    "parameters": {
+      "operation_id": {
+        "source": "path",
+        "name": "operation_id"
+      },
+      "last_event_id": {
+        "source": "header",
+        "name": "Last-Event-ID"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "send_input",
+    "module": "routes.v1.runtime_signals",
+    "handler": "send_input",
+    "method": "POST",
+    "path": "/runs/{run_id}/inputs",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "input_status",
+    "module": "routes.v1.runtime_signals",
+    "handler": "input_status",
+    "method": "GET",
+    "path": "/runs/{run_id}/inputs/{command_id:path}",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "command_id": {
+        "source": "path",
+        "name": "command_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "stream_signals",
+    "module": "routes.v1.runtime_signals",
+    "handler": "stream_signals",
+    "method": "GET",
+    "path": "/runs/{run_id}/signals/stream",
+    "status": 200,
+    "parameters": {
+      "run_id": {
+        "source": "path",
+        "name": "run_id"
+      },
+      "channel": {
+        "source": "body",
+        "name": "channel"
+      },
+      "last_event_id": {
+        "source": "header",
+        "name": "Last-Event-ID"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_health",
+    "module": "routes.v1.system",
+    "handler": "health",
+    "method": "GET",
+    "path": "/health",
+    "status": 200,
+    "parameters": {}
+  },
+  {
+    "action": "get_runtime_status",
+    "module": "routes.v1.system",
+    "handler": "runtime_status",
+    "method": "GET",
+    "path": "/runtime/status",
+    "status": 200,
+    "parameters": {
+      "timeout": {
+        "source": "query",
+        "name": "timeout"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_runtime_health",
+    "module": "routes.v1.system",
+    "handler": "runtime_health",
+    "method": "GET",
+    "path": "/runtime/health",
+    "status": 200,
+    "parameters": {
+      "timeout": {
+        "source": "query",
+        "name": "timeout"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_runtime_diagnostics",
+    "module": "routes.v1.system",
+    "handler": "runtime_diagnostics",
+    "method": "GET",
+    "path": "/runtime/diagnostics",
+    "status": 200,
+    "parameters": {
+      "timeout": {
+        "source": "query",
+        "name": "timeout"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_runtime_resources",
+    "module": "routes.v1.system",
+    "handler": "runtime_resources",
+    "method": "GET",
+    "path": "/runtime/resources",
+    "status": 200,
+    "parameters": {
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "replace_runtime_resources",
+    "module": "routes.v1.system",
+    "handler": "replace_runtime_resources",
+    "method": "PUT",
+    "path": "/runtime/resources",
+    "status": 200,
+    "parameters": {
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_system_summary",
+    "module": "routes.v1.system",
+    "handler": "system_summary",
+    "method": "GET",
+    "path": "/system/summary",
+    "status": 200,
+    "parameters": {
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "get_metrics",
+    "module": "routes.v1.system",
+    "handler": "metrics",
+    "method": "GET",
+    "path": "/metrics",
+    "status": 200,
+    "parameters": {
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "list_nodes",
+    "module": "routes.v1.system",
+    "handler": "nodes",
+    "method": "GET",
+    "path": "/nodes",
+    "status": 200,
+    "parameters": {
+      "page_size": {
+        "source": "query",
+        "name": "page_size"
+      },
+      "page_token": {
+        "source": "query",
+        "name": "page_token"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "create_node",
+    "module": "routes.v1.system",
+    "handler": "create_node",
+    "method": "POST",
+    "path": "/nodes",
+    "status": 201,
+    "parameters": {
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "response": {
+        "source": "response",
+        "name": "response"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "delete_node",
+    "module": "routes.v1.system",
+    "handler": "delete_node",
+    "method": "DELETE",
+    "path": "/nodes/{node_id}",
+    "status": 200,
+    "parameters": {
+      "node_id": {
+        "source": "path",
+        "name": "node_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "create_node_drain",
+    "module": "routes.v1.system",
+    "handler": "create_node_drain",
+    "method": "PUT",
+    "path": "/nodes/{node_id}/drain",
+    "status": 202,
+    "parameters": {
+      "node_id": {
+        "source": "path",
+        "name": "node_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "delete_node_drain",
+    "module": "routes.v1.system",
+    "handler": "delete_node_drain",
+    "method": "DELETE",
+    "path": "/nodes/{node_id}/drain",
+    "status": 204,
+    "parameters": {
+      "node_id": {
+        "source": "path",
+        "name": "node_id"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "update_node",
+    "module": "routes.v1.system",
+    "handler": "update_node",
+    "method": "PATCH",
+    "path": "/nodes/{node_id}",
+    "status": 200,
+    "parameters": {
+      "node_id": {
+        "source": "path",
+        "name": "node_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "create_node_reconciliation",
+    "module": "routes.v1.system",
+    "handler": "create_node_reconciliation",
+    "method": "POST",
+    "path": "/nodes/{node_id}/reconciliations",
+    "status": 202,
+    "parameters": {
+      "node_id": {
+        "source": "path",
+        "name": "node_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "list_job_mailbox",
+    "module": "job_mailbox",
+    "handler": "list_job_mailbox",
+    "method": "GET",
+    "path": "/jobs/{job_id}/mailbox",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "after": {
+        "source": "query",
+        "name": "after"
+      },
+      "limit": {
+        "source": "query",
+        "name": "limit"
+      },
+      "include_acknowledged": {
+        "source": "query",
+        "name": "include_acknowledged"
+      },
+      "kind": {
+        "source": "query",
+        "name": "kind"
+      },
+      "reply_to": {
+        "source": "query",
+        "name": "reply_to"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "send_job_mail",
+    "module": "job_mailbox",
+    "handler": "send_job_mail",
+    "method": "POST",
+    "path": "/jobs/{job_id}/mailbox",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "request": {
+        "source": "body",
+        "name": "request"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "acknowledge_job_mail",
+    "module": "job_mailbox",
+    "handler": "acknowledge_job_mail",
+    "method": "PUT",
+    "path": "/jobs/{job_id}/mailbox/{message_id}/acknowledgement",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "message_id": {
+        "source": "path",
+        "name": "message_id"
+      },
+      "expected_kind": {
+        "source": "query",
+        "name": "expected_kind"
+      },
+      "_principal": {
+        "source": "principal",
+        "name": "_principal"
+      }
+    }
+  },
+  {
+    "action": "list_job_skills",
+    "module": "routes.v1.job_integrations",
+    "handler": "skills",
+    "method": "GET",
+    "path": "/jobs/{job_id}/skills",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "add_job_skill",
+    "module": "routes.v1.job_integrations",
+    "handler": "add_skill",
+    "method": "POST",
+    "path": "/jobs/{job_id}/skills",
+    "status": 202,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "value": {
+        "source": "body",
+        "name": "value"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      },
+      "if_match": {
+        "source": "header",
+        "name": "If-Match"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      }
+    }
+  },
+  {
+    "action": "set_job_skill",
+    "module": "routes.v1.job_integrations",
+    "handler": "enable_skill",
+    "method": "PUT",
+    "path": "/jobs/{job_id}/skills/{name}",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "name": {
+        "source": "path",
+        "name": "name"
+      },
+      "value": {
+        "source": "body",
+        "name": "value"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "list_job_integrations",
+    "module": "routes.v1.job_integrations",
+    "handler": "integrations",
+    "method": "GET",
+    "path": "/jobs/{job_id}/integrations",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "add_job_slack",
+    "module": "routes.v1.job_integrations",
+    "handler": "add_slack",
+    "method": "PUT",
+    "path": "/jobs/{job_id}/integrations/slack",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "connect_job_slack",
+    "module": "routes.v1.job_integrations",
+    "handler": "connect",
+    "method": "POST",
+    "path": "/jobs/{job_id}/integrations/slack/connect",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "value": {
+        "source": "body",
+        "name": "value"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      },
+      "idempotency_key": {
+        "source": "header",
+        "name": "Idempotency-Key"
+      }
+    }
+  },
+  {
+    "action": "control_job_slack",
+    "module": "routes.v1.job_integrations",
+    "handler": "control",
+    "method": "POST",
+    "path": "/jobs/{job_id}/integrations/slack/{operation}",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "operation": {
+        "source": "path",
+        "name": "operation"
+      },
+      "value": {
+        "source": "body",
+        "name": "value"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "deliver_job_slack",
+    "module": "routes.v1.job_integrations",
+    "handler": "deliver",
+    "method": "POST",
+    "path": "/jobs/{job_id}/integrations/slack/desktop/{action}",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "action": {
+        "source": "path",
+        "name": "action"
+      },
+      "value": {
+        "source": "body",
+        "name": "value"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  },
+  {
+    "action": "enabled_job_skill_files",
+    "module": "routes.v1.job_integrations",
+    "handler": "skill_files",
+    "method": "GET",
+    "path": "/jobs/{job_id}/skills/enabled/files",
+    "status": 200,
+    "parameters": {
+      "job_id": {
+        "source": "path",
+        "name": "job_id"
+      },
+      "principal": {
+        "source": "principal",
+        "name": "principal"
+      }
+    }
+  }
+]
