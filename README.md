@@ -6,4 +6,4 @@ This Rust component owns the client connection profile and the gRPC transport to
 
 Node attachment checks the candidate's capabilities and retries interrupted readiness probes for up to 30 seconds. Joining a second node also checks the saved entry's identity before sending it the peer credential. The join has five minutes to return its receipt. If the connection breaks during the join or removal, inspect membership with `mn node list` before submitting another change.
 
-Production installs download `mn-client-support.wasm` from GAR. Use `./install.sh --no-runtime --mode local` in a sibling `mn-deploy` checkout to build the Wasm clients from source.
+Production installs download `mn-client-support.wasm` from GAR. Use `./install_dev.sh --no-runtime` in a sibling `mn-deploy` checkout to build the Wasm clients from source.
